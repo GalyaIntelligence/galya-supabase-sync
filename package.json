@@ -1,0 +1,47 @@
+{
+  "name": "@galya/supabase-sync",
+  "version": "0.1.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "private": false,
+  "description": "Turn your Supabase database into a taste-aware catalog. Sync any table to Galya and get personalised search, reranking, and recommendations powered by preference intelligence.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GalyaIntelligence/galya-supabase-sync.git"
+  },
+  "keywords": [
+    "galya",
+    "supabase",
+    "sync",
+    "cli"
+  ],
+  "type": "module",
+  "bin": {
+    "galya-supabase-sync": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "commander": "^15.0.0",
+    "prompts": "^2.4.2",
+    "zod": "^4.0.0-beta.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "@types/prompts": "^2.4.9",
+    "typescript": "^5.7.3"
+  }
+}
