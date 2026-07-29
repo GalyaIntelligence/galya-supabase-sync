@@ -73,4 +73,3 @@ The `serviceRoleKey` and `apiKey` are stored in plain text. Keep this file out o
 ## License
 
 MIT
-```
