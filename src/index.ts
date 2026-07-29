@@ -3,6 +3,7 @@ import { Command } from "commander";
 import { runSetupWizard } from "./prompts.js";
 import { loadConfig, saveConfig, configExists, CONFIG_FILE} from "./storage.js";
 import { checkSupabase, checkGalya } from "./check.js";
+import { generate } from "./generator.js"
 
 const program = new Command();
 
@@ -65,6 +66,42 @@ program
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       console.error(`\n✗ Validation failed: ${message}`);
+      process.exit(1);
+    }
+  });
+program
+  .command("generate")
+  .description("Generate Supabase Edge Functions and SQL trigger from config")
+  .action(async () => {
+    try {
+      const config = await loadConfig();
+      if (!config) {
+        console.error(
+          `✗ No ${CONFIG_FILE} found. Run 'galya-supabase-sync setup' first.`
+        );
+        process.exit(2);
+      }
+
+      console.log(`Generating files for table '${config.supabase.table}'...`);
+
+      const result = await generate(config);
+
+      console.log(`\n✓ Generated sync function:    ${result.syncFunction}`);
+      console.log(`✓ Generated rerank function:  ${result.rerankFunction}`);
+      console.log(`✓ Generated SQL trigger:      ${result.triggerSql}`);
+      console.log(`
+Next steps:
+  1. Review the generated files
+  2. Add galya_sync_trigger.sql to your .gitignore (it contains your service role key)
+  3. Run 'galya-supabase-sync deploy' to deploy to Supabase  (coming soon)
+  4. Or deploy manually:
+       supabase functions deploy galya-sync-${config.supabase.table}
+       supabase functions deploy galya-rerank-${config.supabase.table}
+       supabase db push
+`);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error(`\n✗ Generate failed: ${message}`);
       process.exit(1);
     }
   });
