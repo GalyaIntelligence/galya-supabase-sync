@@ -1,9 +1,9 @@
-```markdown
 # @galya/supabase-sync
 
 CLI to sync Supabase tables into [Galya](https://galya.io) for taste-based search, reranking, and personalised recommendations.
 
-> **Status:** Early preview. Setup + validate commands only. Full sync, backfill, and monitoring are in progress.
+ **Status:**
+Early preview. Setup + validate commands only. Full sync, backfill, and monitoring are in progress.
 
 ## Install
 
