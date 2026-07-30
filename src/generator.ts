@@ -88,7 +88,14 @@ export async function generate(
   // Fill templates and write files
   const syncPath = path.join(syncFunctionDir, "index.ts");
   const rerankPath = path.join(rerankFunctionDir, "index.ts");
-  const sqlPath = path.join(migrationsDir, "galya_sync_trigger.sql");
+  const timestamp = new Date()
+  .toISOString()
+  .replace(/[-:T.]/g, "")
+  .slice(0, 14); // e.g. "20260730110500"
+const sqlPath = path.join(
+  migrationsDir,
+  `${timestamp}_galya_sync_trigger.sql`
+);
 
   await fs.writeFile(syncPath, fill(SYNC_FUNCTION_TEMPLATE, config), "utf-8");
   await fs.writeFile(rerankPath, fill(RERANK_FUNCTION_TEMPLATE, config), "utf-8");
