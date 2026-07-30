@@ -1,5 +1,19 @@
 import type { Config } from "./config.js";
 
+/**
+ * Build Supabase REST API auth headers.
+ * - Legacy JWT keys (eyJ...) go in both `apikey` and `Authorization: Bearer`.
+ * - New keys (sb_secret_...) go in `apikey` only. `Authorization` is reserved
+ *   for user session JWTs and PostgREST rejects non-JWTs there.
+ */
+function supabaseAuthHeaders(key: string): Record<string, string> {
+  const headers: Record<string, string> = { apikey: key };
+  if (key.startsWith("eyJ")) {
+    headers.Authorization = `Bearer ${key}`;
+  }
+  return headers;
+}
+
 export type CheckResult = {
   ok: boolean;
   message: string;
@@ -14,11 +28,8 @@ export async function checkSupabase(config: Config): Promise<CheckResult> {
   try {
     const res = await fetch(url, {
       method: "GET",
-      headers: {
-        apikey: config.supabase.serviceRoleKey,
-        Authorization: `Bearer ${config.supabase.serviceRoleKey}`,
-      },
-    });
+      headers: supabaseAuthHeaders(config.supabase.serviceRoleKey),
+         });
     if (res.status === 401 || res.status === 403) {
       return {
         ok: false,

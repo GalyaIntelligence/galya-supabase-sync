@@ -69,7 +69,7 @@ export async function inspectRecord(
   }
 
   const galyaRes = await fetch(
-    `${GALYA_BASE}/entity?url=${encodeURIComponent(url)}`,
+    `${GALYA_BASE}/entity?entity_id=${encodeURIComponent(url)}`,
     { method: "GET", headers }
   );
 

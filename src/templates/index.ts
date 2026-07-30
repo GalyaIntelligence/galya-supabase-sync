@@ -138,9 +138,11 @@ CREATE OR REPLACE FUNCTION galya_sync___TABLE__()
 RETURNS trigger
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = ''
 AS $$
 DECLARE
   payload jsonb;
+  headers jsonb;
 BEGIN
   IF TG_OP = 'DELETE' THEN
     payload = jsonb_build_object(
@@ -156,15 +158,26 @@ BEGIN
     );
   END IF;
 
-  PERFORM extensions.net.http_post(
-    url     := '__PROJECT_URL__/functions/v1/galya-sync-__TABLE__',
-    body    := payload,
-    headers := jsonb_build_object(
+  -- New sb_secret_... keys are not JWTs; PostgREST/Edge Runtime reject them
+  -- in the Authorization header. Send them in 'apikey' instead.
+  -- Legacy service_role JWTs keep working via Bearer for backwards compat.
+  IF '__SERVICE_ROLE_KEY__' LIKE 'sb_secret_%' THEN
+    headers = jsonb_build_object(
+      'Content-Type', 'application/json',
+      'apikey',       '__SERVICE_ROLE_KEY__'
+    );
+  ELSE
+    headers = jsonb_build_object(
       'Content-Type',  'application/json',
       'Authorization', 'Bearer __SERVICE_ROLE_KEY__'
-    )
-  );
+    );
+  END IF;
 
+  PERFORM net.http_post(
+    url     := '__PROJECT_URL__/functions/v1/galya-sync-__TABLE__',
+    body    := payload,
+    headers := headers
+  );
   IF TG_OP = 'DELETE' THEN
     RETURN OLD;
   END IF;

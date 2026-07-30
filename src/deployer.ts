@@ -89,13 +89,13 @@ export async function deployFunctions(
 
   await execa(
     "supabase",
-    ["functions", "deploy", `galya-sync-${table}`],
+    ["functions", "deploy", `galya-sync-${table}`, "--no-verify-jwt"],
     { cwd, stdio: "inherit" }
   );
 
   await execa(
     "supabase",
-    ["functions", "deploy", `galya-rerank-${table}`],
+    ["functions", "deploy", `galya-rerank-${table}`, "--no-verify-jwt"],
     { cwd, stdio: "inherit" }
   );
 }
