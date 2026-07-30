@@ -5,6 +5,7 @@ import { loadConfig, saveConfig, configExists, CONFIG_FILE} from "./storage.js";
 import { checkSupabase, checkGalya } from "./check.js";
 import { generate } from "./generator.js"
 import { checkSupabaseCli, checkProjectLinked, setSecrets, deployFunctions, pushMigration } from "./deployer.js";
+import { backfill } from "./backfill.js";
 
 const program = new Command();
 
@@ -162,6 +163,56 @@ Next: run 'galya-supabase-sync validate' to confirm credentials are healthy.
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       console.error(`\n✗ Deploy failed: ${message}`);
+      process.exit(1);
+    }
+  });
+program
+  .command("backfill")
+  .description("Sync all existing rows from your Supabase table to Galya")
+  .option("--limit <number>", "Max rows to index (useful for testing)")
+  .action(async (options) => {
+    try {
+      const config = await loadConfig();
+      if (!config) {
+        console.error(
+          `✗ No ${CONFIG_FILE} found. Run 'galya-supabase-sync setup' first.`
+        );
+        process.exit(2);
+      }
+
+      const limit = options.limit ? parseInt(options.limit, 10) : undefined;
+
+      if (limit !== undefined && (isNaN(limit) || limit < 1)) {
+        console.error("✗ --limit must be a positive number");
+        process.exit(1);
+      }
+
+      console.log(
+        `Starting backfill for table '${config.supabase.table}'${limit ? ` (limit: ${limit})` : ""}...`
+      );
+
+      const result = await backfill(config, limit);
+
+      if (result.total === 0) {
+        console.log("No rows found in table — nothing to backfill.");
+        return;
+      }
+
+      console.log(`\n✓ Backfill complete`);
+      console.log(`  Total:     ${result.total}`);
+      console.log(`  Succeeded: ${result.succeeded}`);
+      console.log(`  Failed:    ${result.failed}`);
+
+      if (result.errors.length > 0) {
+        console.log("\nFailed rows:");
+        for (const e of result.errors) {
+          console.log(`  row ${e.rowId}: ${e.error}`);
+        }
+        process.exit(3);
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error(`\n✗ Backfill failed: ${message}`);
       process.exit(1);
     }
   });
