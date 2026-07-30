@@ -87,13 +87,13 @@ supabase/
     └── galya_sync_trigger.sql            ← Postgres trigger
 ```
 
-⚠️  Add `galya_sync_trigger.sql` to your `.gitignore` — it contains your service role key.
+⚠️  Add `galya_sync_trigger.sql` to your `.gitignore` as it contains your service role key.
 
 ---
 
 ### `deploy`
 
-Generate files, set Supabase secrets, deploy Edge Functions, and push the SQL trigger — all in one command.
+Generate files, set Supabase secrets, deploy Edge Functions, and push the SQL trigger all in one command.
 
 ```bash
 galya-supabase-sync deploy
@@ -107,7 +107,7 @@ Requires:
 
 ### `backfill`
 
-Sync all existing rows from your Supabase table into Galya. The trigger only fires on new changes — use this to index data that existed before deployment.
+Sync all existing rows from your Supabase table into Galya. The trigger only fires on new changes, use this to index data that existed before deployment.
 
 ```bash
 galya-supabase-sync backfill
