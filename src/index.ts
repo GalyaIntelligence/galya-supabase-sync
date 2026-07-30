@@ -6,6 +6,7 @@ import { checkSupabase, checkGalya } from "./check.js";
 import { generate } from "./generator.js"
 import { checkSupabaseCli, checkProjectLinked, setSecrets, deployFunctions, pushMigration } from "./deployer.js";
 import { backfill } from "./backfill.js";
+import {streamLogs, inspectRecord } from "./monitor.js";
 
 const program = new Command();
 
@@ -216,5 +217,80 @@ program
       process.exit(1);
     }
   });
-program.parseAsync(process.argv);
+program
+  .command("status")
+  .description("Show config summary and credential health")
+  .action(async () => {
+    try {
+      const config = await loadConfig();
+      if (!config) {
+        console.error(
+          `✗ No ${CONFIG_FILE} found. Run 'galya-supabase-sync setup' first.`
+        );
+        process.exit(2);
+      }
 
+      console.log("Config:");
+      console.log(`  Supabase project: ${config.supabase.projectUrl}`);
+      console.log(`  Table:            ${config.supabase.table}`);
+      console.log(`  Galya key:        ${config.galya.apiKey.slice(0, 12)}...`);
+      console.log(`  Workspace ID:     ${config.galya.workspaceId ?? "(not set)"}`);
+      console.log(`  Content type:     ${config.fields.type}`);
+      console.log(`  Field mapping:    id=${config.fields.id}, url=${config.fields.url}`);
+
+      console.log("\nChecking credentials...");
+      const supa = await checkSupabase(config);
+      console.log(`  ${supa.ok ? "✓" : "✗"} Supabase: ${supa.message}`);
+
+      const galya = await checkGalya(config);
+      console.log(`  ${galya.ok ? "✓" : "✗"} Galya:    ${galya.message}`);
+
+      if (!supa.ok || !galya.ok) process.exit(3);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error(`\n✗ Status check failed: ${message}`);
+      process.exit(1);
+    }
+  });
+
+program
+  .command("logs")
+  .description("Stream recent Edge Function logs from Supabase")
+  .action(async () => {
+    const cwd = process.cwd();
+    try {
+      const config = await loadConfig();
+      if (!config) {
+        console.error(
+          `✗ No ${CONFIG_FILE} found. Run 'galya-supabase-sync setup' first.`
+        );
+        process.exit(2);
+      }
+      await streamLogs(config, cwd);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error(`\n✗ Logs failed: ${message}`);
+      process.exit(1);
+    }
+  });
+
+program
+  .command("inspect <id>")
+  .description("Check if a specific record is indexed in Galya")
+  .action(async (id: string) => {
+    try {
+      const config = await loadConfig();
+      if (!config) {
+        console.error(
+          `✗ No ${CONFIG_FILE} found. Run 'galya-supabase-sync setup' first.`
+        );
+        process.exit(2);
+      }
+      await inspectRecord(config, id);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error(`\n✗ Inspect failed: ${message}`);
+      process.exit(1);
+    }
+  });
+program.parseAsync(process.argv);
