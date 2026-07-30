@@ -1,4 +1,3 @@
-import { execa } from "execa";
 import { createClient } from "@supabase/supabase-js";
 import type { Config } from "./config.js";
 
@@ -10,14 +9,14 @@ const GALYA_BASE = "https://api.galya.io/v1";
  */
 export async function streamLogs(
   config: Config,
-  cwd: string
+  _cwd: string
 ): Promise<void> {
   const table = config.supabase.table;
-  await execa(
-    "supabase",
-    ["functions", "logs", `galya-sync-${table}`],
-    { cwd, stdio: "inherit" }
-  );
+  const ref = new URL(config.supabase.projectUrl).hostname.split(".")[0];
+
+  console.log(`The Supabase CLI no longer supports streaming function logs directly.`);
+  console.log(`View logs for galya-sync-${table} in the Dashboard:`);
+  console.log(`  https://supabase.com/dashboard/project/${ref}/functions/galya-sync-${table}/logs`);
 }
 
 /**
