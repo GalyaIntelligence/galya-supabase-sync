@@ -227,7 +227,7 @@ For reranking:
 
 ```bash
 curl -X POST https://YOUR_PROJECT.supabase.co/functions/v1/galya-rerank-{table} \
-  -H "Authorization: Bearer YOUR_ANON_KEY" \
+  -H "Authorization: Bearer YOUR_PUBLISHABLE_KEY" \
   -H "Content-Type: application/json" \
   -d '{"userId": "user-entity-id"}'
 ```
