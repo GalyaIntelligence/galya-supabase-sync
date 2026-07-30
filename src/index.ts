@@ -4,6 +4,7 @@ import { runSetupWizard } from "./prompts.js";
 import { loadConfig, saveConfig, configExists, CONFIG_FILE} from "./storage.js";
 import { checkSupabase, checkGalya } from "./check.js";
 import { generate } from "./generator.js"
+import { checkSupabaseCli, checkProjectLinked, setSecrets, deployFunctions, pushMigration } from "./deployer.js";
 
 const program = new Command();
 
@@ -102,6 +103,65 @@ Next steps:
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       console.error(`\n✗ Generate failed: ${message}`);
+      process.exit(1);
+    }
+  });
+program
+  .command("deploy")
+  .description("Generate, deploy Edge Functions, set secrets, and push SQL trigger")
+  .action(async () => {
+    const cwd = process.cwd();
+
+    try {
+      // 1. Load config
+      const config = await loadConfig();
+      if (!config) {
+        console.error(
+          `✗ No ${CONFIG_FILE} found. Run 'galya-supabase-sync setup' first.`
+        );
+        process.exit(2);
+      }
+
+      // 2. Check prerequisites
+      console.log("Checking prerequisites...");
+      await checkSupabaseCli();
+      console.log("  ✓ Supabase CLI found");
+      await checkProjectLinked(config, cwd);
+      console.log("  ✓ Supabase project linked");
+
+      // 3. Generate files
+      console.log("\nGenerating Edge Functions and SQL trigger...");
+      const result = await generate(config, cwd);
+      console.log(`  ✓ ${result.syncFunction}`);
+      console.log(`  ✓ ${result.rerankFunction}`);
+      console.log(`  ✓ ${result.triggerSql}`);
+
+      // 4. Set secrets
+      console.log("\nSetting Supabase secrets...");
+      await setSecrets(config, cwd);
+
+      // 5. Deploy Edge Functions
+      console.log("\nDeploying Edge Functions...");
+      await deployFunctions(config, cwd);
+
+      // 6. Push SQL migration
+      console.log("\nPushing SQL trigger migration...");
+      await pushMigration(cwd);
+
+      // 7. Done
+      const table = config.supabase.table;
+      console.log(`
+✓ Deployment complete!
+
+Your Supabase table '${table}' is now connected to Galya:
+  • Every INSERT / UPDATE / DELETE → syncs to Galya automatically
+  • Call galya-rerank-${table} to get personalised results for a user
+
+Next: run 'galya-supabase-sync validate' to confirm credentials are healthy.
+`);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error(`\n✗ Deploy failed: ${message}`);
       process.exit(1);
     }
   });
