@@ -35,8 +35,7 @@ async function indexRow(
     : "";
   const content =
     [title, description].filter(Boolean).join(". ").trim() || url;
-
-  const res = await fetch(`${GALYA_BASE}/index`, {
+  const res = await fetch(`${GALYA_BASE}/entity`, {
     method: "POST",
     headers: galyaHeaders(config),
     body: JSON.stringify({
