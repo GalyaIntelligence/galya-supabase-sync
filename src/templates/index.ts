@@ -28,13 +28,17 @@ async function indexRecord(record: Record<string, unknown>): Promise<void> {
   __DESC_EXTRACTION__
   const content = [title, description].filter(Boolean).join(". ").trim() || url;
 
-  await fetch(\`\${GALYA_BASE}/entity\`,{
+  const res = await fetch(\`\${GALYA_BASE}/entity\`,{
     method: "POST",
     headers: galyaHeaders(),
     body: JSON.stringify({
       content: { url, type: "__CONTENT_TYPE__", content },
     }),
   });
+  if (!res.ok) {
+     const body = await res.text().catch(() => \"\");
+     throw new Error(\`Galya error \${res.status}: \${body.slice(0, 200)}\`);
+  }
 }
 
 async function deleteRecord(record: Record<string, unknown>): Promise<void> {
