@@ -15,8 +15,16 @@ export async function runSetupWizard(): Promise<Config> {
         type: "text",
         name: "supabaseUrl",
         message: "Supabase project URL",
-        validate: (value: string) =>
-          value.startsWith("https://") ? true : "Must be a valid https:// URL",
+        validate: (value: string) => {
+         if (!value.startsWith("https://")) return "Must be a valid https:// URL";
+         if (value.includes("supabase.com/dashboard")) {
+           return "That's the dashboard URL. Use your project API URL: https://<ref>.supabase.co";
+            }
+         if (!value.includes(".supabase.co")) {
+             return "Must be your project API URL (https://<ref>.supabase.co)";
+         }
+         return true;
+       },
       },
       {
         type: "password",
