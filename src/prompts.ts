@@ -88,6 +88,21 @@ export async function runSetupWizard(): Promise<Config> {
         ],
         initial: 0,
       },
+      {
+        type: "select",
+        name: "domain",
+        message: "Content domain (what category best fits your data)",
+        choices: [
+          { title: "Ecommerce / Shopping", value: "ecommerce" },
+          { title: "Restaurants / Hospitality", value: "restaurants" },
+          { title: "Travel", value: "travel" },
+          { title: "Fashion", value: "fashion" },
+          { title: "UI/UX / Design", value: "uiux" },
+          { title: "Professional / LinkedIn", value: "professional" },
+          { title: "Conversation", value: "conversation" },
+        ],
+        initial: 0,
+      },
     ],
     {
       onCancel: () => {
@@ -112,6 +127,7 @@ export async function runSetupWizard(): Promise<Config> {
       title: answers.fieldTitle || undefined,
       description: answers.fieldDescription || undefined,
       type: answers.contentType,
+      domain: answers.domain,
     },
   };
 }

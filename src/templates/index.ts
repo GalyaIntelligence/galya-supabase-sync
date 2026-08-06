@@ -32,7 +32,7 @@ async function indexRecord(record: Record<string, unknown>): Promise<void> {
     method: "POST",
     headers: galyaHeaders(),
     body: JSON.stringify({
-      content: { url, type: "__CONTENT_TYPE__", content },
+      content: { url, type: "__CONTENT_TYPE__", content, domain: "__DOMAIN__" },
     }),
   });
   if (!res.ok) {

@@ -39,7 +39,7 @@ async function indexRow(
     method: "POST",
     headers: galyaHeaders(config),
     body: JSON.stringify({
-      content: { url, type: config.fields.type, content },
+      content: { url, type: config.fields.type, content, domain: config.fields.domain},
     }),
   });
 

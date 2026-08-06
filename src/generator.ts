@@ -52,7 +52,8 @@ const descExtraction = fieldDesc
     .replaceAll("__PROJECT_URL__", projectUrl)
     .replaceAll("__SERVICE_ROLE_KEY__", serviceRoleKey)
     .replaceAll("__OPTIONAL_TITLE__", optionalTitle)
-    .replaceAll("__OPTIONAL_DESC__", optionalDesc);
+    .replaceAll("__OPTIONAL_DESC__", optionalDesc)
+    .replaceAll("__DOMAIN__", config.fields.domain);
 }
 
 /**

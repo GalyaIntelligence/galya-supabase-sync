@@ -15,11 +15,16 @@ export const ConfigSchema = z.object({
     workspaceId: z.string().optional(),
   }),
   fields: z.object({
-    id: z.string().min(1),
-    url: z.string().min(1),
-    title: z.string().optional(),
-    description: z.string().optional(),
-    type: z.enum(["text", "image", "audio", "video"]).default("text"),
-  }),
+  id: z.string().min(1),
+  url: z.string().min(1),
+  title: z.string().optional(),
+  description: z.string().optional(),
+  type: z.enum(["text", "image", "audio", "video"]).default("text"),
+  domain: z.enum([
+    "restaurants", "travel", "ecommerce", "uiux",
+    "fashion", "conversation", "professional"
+  ]),
+}),
 });
+
 export type Config = z.infer<typeof ConfigSchema>;
