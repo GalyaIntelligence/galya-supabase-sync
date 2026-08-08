@@ -13,7 +13,7 @@ npm install -g @galya/supabase-sync
 ## Requirements
 
 - Node.js 20+
-- A [Supabase](https://supabase.com) project with a service role key
+- A [Supabase](https://supabase.com) project with a **Secret API Key** (`sb_secret_...`) or legacy service role key
 - A [Galya](https://galya.io) workspace key (`galya_wsk_...`)
 - [Supabase CLI](https://supabase.com/docs/guides/cli) (required for `deploy` and `logs`)
 
@@ -51,6 +51,7 @@ Asks for:
 - Galya API key + optional workspace ID
 - Field mapping (which columns map to id, url, title, description)
 - Content type (text / image / audio / video)
+- - Content domain (restaurants / travel / ecommerce / uiux / fashion / conversation / professional)
 
 ---
 
@@ -84,7 +85,7 @@ supabase/
 │   ├── galya-sync-{table}/index.ts       ← syncs changes to Galya
 │   └── galya-rerank-{table}/index.ts     ← reranks catalog by user taste
 └── migrations/
-    └── galya_sync_trigger.sql            ← Postgres trigger
+    └── <timestamp>_galya_sync_trigger.sql            ← Postgres trigger
 ```
 
 ⚠️  Add `galya_sync_trigger.sql` to your `.gitignore` as it contains your service role key.
@@ -134,7 +135,7 @@ Prints your config summary and runs live checks against Supabase and Galya.
 
 ### `logs`
 
-Stream recent Edge Function logs for the sync function.
+Prints a direct link to the Edge Function logs in the Supabase Dashboard.
 
 ```bash
 galya-supabase-sync logs
@@ -176,7 +177,7 @@ The wizard writes `galya-sync.config.json` in the current directory:
 {
   "supabase": {
     "projectUrl": "https://xxxx.supabase.co",
-    "serviceRoleKey": "eyJ...",
+    "serviceRoleKey": "sb_secret_...",
     "table": "recipes"
   },
   "galya": {
@@ -188,7 +189,8 @@ The wizard writes `galya-sync.config.json` in the current directory:
     "url": "url",
     "title": "title",
     "description": "description",
-    "type": "text"
+    "type": "text",
+    "domain": "ecommerce"
   }
 }
 ```
@@ -219,7 +221,7 @@ Postgres trigger fires
          ▼
 galya-sync-{table} Edge Function
          │
-         ├── INSERT / UPDATE → POST /v1/index (Galya indexes the row)
+         ├── INSERT / UPDATE → POST /v1/entity (Galya indexes the row)
          └── DELETE          → DELETE /v1/entity (Galya removes the row)
 ```
 
