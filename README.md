@@ -51,7 +51,7 @@ Asks for:
 - Galya API key + optional workspace ID
 - Field mapping (which columns map to id, url, title, description)
 - Content type (text / image / audio / video)
-- - Content domain (restaurants / travel / ecommerce / uiux / fashion / conversation / professional)
+- Content domain (restaurants / travel / ecommerce / uiux / fashion / conversation / professional)
 
 ---
 
